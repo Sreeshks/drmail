@@ -137,11 +137,60 @@ class _EmailScreenState extends State<EmailScreen>
 
   Future<void> _loadEmailServiceSettings() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    _serviceIdController.text =
-        prefs.getString('serviceId') ?? 'service_po5m52c';
-    _templateIdController.text =
-        prefs.getString('templateId') ?? 'template_icnzmr9';
-    _userIdController.text = prefs.getString('userId') ?? 'ys6bmZUnz4w5hWi1g';
+    _serviceIdController.text = prefs.getString('serviceId') ?? '';
+    _templateIdController.text = prefs.getString('templateId') ?? '';
+    _userIdController.text = prefs.getString('userId') ?? '';
+
+    // Check if any EmailJS ID is missing and show dialog
+    if (_serviceIdController.text.trim().isEmpty ||
+        _templateIdController.text.trim().isEmpty ||
+        _userIdController.text.trim().isEmpty) {
+      // Wait for the first frame to ensure context is available
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              backgroundColor: const Color(0xFF222222),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: Row(
+                children: [
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.amber,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'EmailJS Required',
+                    style: GoogleFonts.poppins(color: Colors.white),
+                  ),
+                ],
+              ),
+              content: Text(
+                'Please add your EmailJS Service ID, Template ID, and User ID in the settings before using the app.',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+              actions: [
+                TextButton(
+                  child: Text(
+                    'Open Settings',
+                    style: GoogleFonts.poppins(color: Colors.amber),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _showServiceSettingsDialog();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      });
+    }
   }
 
   Future<void> _saveEmailServiceSettings() async {
@@ -189,11 +238,17 @@ class _EmailScreenState extends State<EmailScreen>
   Future<void> sendEmail() async {
     if (_bodyController.text.isEmpty ||
         _loginTimeController.text.isEmpty ||
-        _logoutTimeController.text.isEmpty ||
-        _serviceIdController.text.isEmpty ||
-        _templateIdController.text.isEmpty ||
-        _userIdController.text.isEmpty) {
+        _logoutTimeController.text.isEmpty) {
       showToast('Please fill all fields');
+      return;
+    }
+    if (_serviceIdController.text.trim().isEmpty ||
+        _templateIdController.text.trim().isEmpty ||
+        _userIdController.text.trim().isEmpty) {
+      showToast(
+        'Please add your EmailJS Service ID, Template ID, and User ID in the settings before sending a report.',
+      );
+      _showServiceSettingsDialog();
       return;
     }
 
