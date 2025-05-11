@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -554,6 +555,12 @@ class _EmailScreenState extends State<EmailScreen>
                     builder: (context) => const HowToSetEmailJsScreen(),
                   ),
                 );
+              } else if (value == 'contact_us') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const ContactUsScreen(),
+                  ),
+                );
               }
             },
             itemBuilder:
@@ -589,6 +596,20 @@ class _EmailScreenState extends State<EmailScreen>
                           'How to set EmailJS',
                           style: GoogleFonts.poppins(),
                         ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'contact_us',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.contact_mail_outlined,
+                          color: Colors.amber,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text('Contact Us', style: GoogleFonts.poppins()),
                       ],
                     ),
                   ),
@@ -918,7 +939,7 @@ class _EmailScreenState extends State<EmailScreen>
                         const SizedBox(height: 20),
                         Center(
                           child: Text(
-                            '© 2025 Developed by Sreesh K Suresh',
+                            '© 2024 Developed by Sreesh K Suresh',
                             style: GoogleFonts.poppins(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -1240,4 +1261,83 @@ class HowToSetEmailJsScreen extends StatelessWidget {
       ],
     ),
   );
+}
+
+// Contact Us Screen
+class ContactUsScreen extends StatelessWidget {
+  const ContactUsScreen({super.key});
+
+  void _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Contact Us',
+          style: GoogleFonts.poppins(color: Colors.amber),
+        ),
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.amber),
+      ),
+      backgroundColor: Colors.black87,
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Contact Us',
+              style: GoogleFonts.poppins(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.amber,
+              ),
+            ),
+            const SizedBox(height: 18),
+            ListTile(
+              leading: const Icon(Icons.email, color: Colors.amber),
+              title: Text(
+                'sreeshksureshh@gmail.com',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+              onTap: () => _launchUrl('mailto:sreeshksureshh@gmail.com'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.linked_camera, color: Colors.amber),
+              title: Text(
+                'LinkedIn',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+              subtitle: Text(
+                'linkedin.com/in/sreesh-k-suresh',
+                style: GoogleFonts.poppins(color: Colors.grey),
+              ),
+              onTap:
+                  () => _launchUrl(
+                    'https://www.linkedin.com/in/sreesh-k-suresh/',
+                  ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.code, color: Colors.amber),
+              title: Text(
+                'GitHub',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+              subtitle: Text(
+                'github.com/Sreeshks',
+                style: GoogleFonts.poppins(color: Colors.grey),
+              ),
+              onTap: () => _launchUrl('https://github.com/Sreeshks'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
