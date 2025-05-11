@@ -538,6 +538,62 @@ class _EmailScreenState extends State<EmailScreen>
           ],
         ),
         actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.help_outline, color: Colors.amber),
+            color: const Color(0xFF222222),
+            onSelected: (value) {
+              if (value == 'how_to_use') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const HowToUseScreen(),
+                  ),
+                );
+              } else if (value == 'how_to_set_emailjs') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const HowToSetEmailJsScreen(),
+                  ),
+                );
+              }
+            },
+            itemBuilder:
+                (context) => [
+                  PopupMenuItem(
+                    value: 'how_to_use',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          color: Colors.amber,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'How to use DR MAIL',
+                          style: GoogleFonts.poppins(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'how_to_set_emailjs',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.email_outlined,
+                          color: Colors.amber,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'How to set EmailJS',
+                          style: GoogleFonts.poppins(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+          ),
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: Colors.amber),
             onPressed: _showServiceSettingsDialog,
@@ -862,7 +918,7 @@ class _EmailScreenState extends State<EmailScreen>
                         const SizedBox(height: 20),
                         Center(
                           child: Text(
-                            '© 2024 Developed by Sreesh K Suresh',
+                            '© 2025 Developed by Sreesh K Suresh',
                             style: GoogleFonts.poppins(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -1018,4 +1074,170 @@ class _EmailScreenState extends State<EmailScreen>
     _tabController.dispose();
     super.dispose();
   }
+}
+
+// How to Use Screen
+class HowToUseScreen extends StatelessWidget {
+  const HowToUseScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'How to use DR MAIL',
+          style: GoogleFonts.poppins(color: Colors.amber),
+        ),
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.amber),
+      ),
+      backgroundColor: Colors.black87,
+      body: ListView(
+        padding: const EdgeInsets.all(24),
+        children: [
+          Text(
+            'How to use DR MAIL',
+            style: GoogleFonts.poppins(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.amber,
+            ),
+          ),
+          const SizedBox(height: 18),
+          _step(
+            '1. Open the app. You will see two tabs: New Report and History.',
+          ),
+          _step(
+            '2. In the New Report tab, enter your daily activities. Use the "Add Point" button to add bullet points.',
+          ),
+          _step(
+            '3. Set your Login and Logout times if needed by tapping the time fields.',
+          ),
+          _step(
+            '4. Press the "Send Report" button to send your daily report via email.',
+          ),
+          _step(
+            '5. After sending, your report is saved in the History tab for future reference.',
+          ),
+          _step('6. To view or delete past reports, go to the History tab.'),
+          _step(
+            '7. To configure email service settings, tap the settings icon (top right).',
+          ),
+          _step(
+            '8. Your total sent reports count is shown in the success dialog after sending.',
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Tips:',
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              color: Colors.amber,
+            ),
+          ),
+          _step('- Use bullet points for clarity.'),
+          _step('- You can edit your email service settings anytime.'),
+          _step('- All data is stored locally and securely.'),
+        ],
+      ),
+    );
+  }
+
+  Widget _step(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 14),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(Icons.check_circle_outline, color: Colors.amber, size: 20),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(fontSize: 15, color: Colors.white),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+// How to Set EmailJS Screen
+class HowToSetEmailJsScreen extends StatelessWidget {
+  const HowToSetEmailJsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'How to set EmailJS',
+          style: GoogleFonts.poppins(color: Colors.amber),
+        ),
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.amber),
+      ),
+      backgroundColor: Colors.black87,
+      body: ListView(
+        padding: const EdgeInsets.all(24),
+        children: [
+          Text(
+            'How to set up EmailJS',
+            style: GoogleFonts.poppins(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.amber,
+            ),
+          ),
+          const SizedBox(height: 18),
+          _step(
+            '1. Go to https://www.emailjs.com/ and sign up for a free account.',
+          ),
+          _step(
+            '2. Add an email service (e.g., Gmail, Outlook) in the Email Services section.',
+          ),
+          _step(
+            '3. Create a new email template. Add variables like {{body}}, {{login_time}}, {{logout_time}}, and {{date}}.',
+          ),
+          _step(
+            '4. Copy your Service ID, Template ID, and User ID from the EmailJS dashboard.',
+          ),
+          _step('5. In the DR MAIL app, tap the settings icon (top right).'),
+          _step(
+            '6. Paste your Service ID, Template ID, and User ID into the respective fields.',
+          ),
+          _step('7. Save the settings. You are now ready to send reports!'),
+          const SizedBox(height: 24),
+          Text(
+            'Tips:',
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              color: Colors.amber,
+            ),
+          ),
+          _step(
+            '- Make sure your template variables match the app (body, login_time, logout_time, date).',
+          ),
+          _step(
+            '- You can test your template in the EmailJS dashboard before using it in the app.',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _step(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 14),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(Icons.check_circle_outline, color: Colors.amber, size: 20),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(fontSize: 15, color: Colors.white),
+          ),
+        ),
+      ],
+    ),
+  );
 }
