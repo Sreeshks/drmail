@@ -768,20 +768,57 @@ class _EmailScreenState extends State<EmailScreen>
                         const SizedBox(height: 20),
 
                         // Report Body
-                        Text(
-                          'Daily Activities',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Daily Activities',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                            TextButton.icon(
+                              onPressed: () {
+                                final currentText = _bodyController.text;
+                                final newPoint = '• ';
+                                if (currentText.isEmpty) {
+                                  _bodyController.text = newPoint;
+                                } else {
+                                  _bodyController.text =
+                                      currentText + '\n' + newPoint;
+                                }
+                                // Move cursor to end of text
+                                _bodyController
+                                    .selection = TextSelection.fromPosition(
+                                  TextPosition(
+                                    offset: _bodyController.text.length,
+                                  ),
+                                );
+                              },
+                              icon: const Icon(
+                                Icons.add_circle_outline,
+                                color: Colors.amber,
+                              ),
+                              label: Text(
+                                'Add Point',
+                                style: GoogleFonts.poppins(color: Colors.amber),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 8),
                         TextField(
                           controller: _bodyController,
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Roboto',
+                            fontSize: 14,
+                          ),
                           decoration: const InputDecoration(
-                            hintText: 'Enter your daily activities here...',
+                            hintText:
+                                'Enter your daily activities here...\nClick "Add Point" to add bullet points',
                             hintStyle: TextStyle(color: Colors.grey),
                             prefixIcon: Icon(
                               Icons.edit_note,
@@ -821,6 +858,17 @@ class _EmailScreenState extends State<EmailScreen>
                               .shimmer(delay: 2.seconds, duration: 1.seconds)
                               .then()
                               .shimmer(delay: 5.seconds, duration: 1.seconds),
+                        ),
+                        const SizedBox(height: 20),
+                        Center(
+                          child: Text(
+                            '© 2024 Developed by Sreesh K Suresh',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ).animate().fadeIn(duration: 1.seconds),
                         ),
                       ],
                     ),
