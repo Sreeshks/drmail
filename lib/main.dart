@@ -449,9 +449,19 @@ class _EmailScreenState extends State<EmailScreen>
             children: [
               const Icon(Icons.settings, color: Colors.amber),
               const SizedBox(width: 8),
-              Text(
-                'Email Service Settings',
-                style: GoogleFonts.poppins(color: Colors.white),
+              Text('EmailJs', style: GoogleFonts.poppins(color: Colors.white)),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.help_outline, color: Colors.amber),
+                tooltip: 'How to use EmailJS',
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const HowToSetEmailJsScreen(),
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -939,7 +949,7 @@ class _EmailScreenState extends State<EmailScreen>
                         const SizedBox(height: 20),
                         Center(
                           child: Text(
-                            '© 2024 Developed by Sreesh K Suresh',
+                            '© 2025 Developed by Sreesh K Suresh',
                             style: GoogleFonts.poppins(
                               fontSize: 12,
                               color: Colors.grey[600],
