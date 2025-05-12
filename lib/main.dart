@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -141,7 +142,7 @@ class _EmailScreenState extends State<EmailScreen>
     _templateIdController.text = prefs.getString('templateId') ?? '';
     _userIdController.text = prefs.getString('userId') ?? '';
 
-    // Check if any EmailJS ID is missing and show dialog
+
     if (_serviceIdController.text.trim().isEmpty ||
         _templateIdController.text.trim().isEmpty ||
         _userIdController.text.trim().isEmpty) {
@@ -544,6 +545,118 @@ class _EmailScreenState extends State<EmailScreen>
                 decoration: const InputDecoration(
                   labelText: 'User ID',
                   labelStyle: TextStyle(color: Colors.amber),
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  const template = '''<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Daily Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      color: #222;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      background: #fff;
+      margin: 30px auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      padding: 32px 28px 18px 28px;
+    }
+    .header {
+      border-bottom: 1.5px solid #e0e0e0;
+      padding-bottom: 10px;
+      margin-bottom: 18px;
+    }
+    .header h2 {
+      margin: 0;
+      font-size: 22px;
+      color: #1a73e8;
+      font-weight: 600;
+    }
+    .content p {
+      margin: 10px 0 0 0;
+      font-size: 15px;
+    }
+    .time-info {
+      background: #f7fafc;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 10px 16px;
+      margin: 18px 0 12px 0;
+      font-size: 14px;
+    }
+    .activities {
+      margin: 0 0 10px 0;
+    }
+    .activities ul {
+      margin: 0 0 0 18px;
+      padding: 0;
+    }
+    .activities li {
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+    .signature {
+      margin-top: 24px;
+      border-top: 1px solid #e0e0e0;
+      padding-top: 12px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Daily Report</h2>
+    </div>
+    <div class="content">
+      <p>Dear Team,</p>
+      <p>Please find my end-of-day report below:</p>
+      <div class="time-info">
+        <strong>Login Time:</strong> {{ login_time }}<br>
+        <strong>Logout Time:</strong> {{ logout_time }}
+      </div>
+      <div class="activities">
+        <strong>Daily Activities:</strong>
+        <div style="white-space: pre-line; font-family: Arial, sans-serif; margin: 0 0 10px 0;">
+  {{ body }}
+</div>
+      </div>
+    </div>
+    <div class="signature">
+      Best regards,<br>
+      <strong>Sreesh</strong>
+    </div>
+  </div>
+</body>
+</html>''';
+                  Clipboard.setData(const ClipboardData(text: template));
+                  showToast('Template copied to clipboard!');
+                },
+                icon: const Icon(Icons.copy, color: Colors.black),
+                label: Text(
+                  'Copy Template',
+                  style: GoogleFonts.poppins(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amber,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
               ),
             ],
