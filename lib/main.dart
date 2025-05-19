@@ -142,7 +142,6 @@ class _EmailScreenState extends State<EmailScreen>
     _templateIdController.text = prefs.getString('templateId') ?? '';
     _userIdController.text = prefs.getString('userId') ?? '';
 
-
     if (_serviceIdController.text.trim().isEmpty ||
         _templateIdController.text.trim().isEmpty ||
         _userIdController.text.trim().isEmpty) {
@@ -547,118 +546,6 @@ class _EmailScreenState extends State<EmailScreen>
                   labelStyle: TextStyle(color: Colors.amber),
                 ),
               ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () {
-                  const template = '''<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Daily Report</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      color: #222;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 600px;
-      background: #fff;
-      margin: 30px auto;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-      padding: 32px 28px 18px 28px;
-    }
-    .header {
-      border-bottom: 1.5px solid #e0e0e0;
-      padding-bottom: 10px;
-      margin-bottom: 18px;
-    }
-    .header h2 {
-      margin: 0;
-      font-size: 22px;
-      color: #1a73e8;
-      font-weight: 600;
-    }
-    .content p {
-      margin: 10px 0 0 0;
-      font-size: 15px;
-    }
-    .time-info {
-      background: #f7fafc;
-      border: 1px solid #e0e0e0;
-      border-radius: 4px;
-      padding: 10px 16px;
-      margin: 18px 0 12px 0;
-      font-size: 14px;
-    }
-    .activities {
-      margin: 0 0 10px 0;
-    }
-    .activities ul {
-      margin: 0 0 0 18px;
-      padding: 0;
-    }
-    .activities li {
-      margin-bottom: 6px;
-      font-size: 15px;
-    }
-    .signature {
-      margin-top: 24px;
-      border-top: 1px solid #e0e0e0;
-      padding-top: 12px;
-      font-size: 14px;
-      color: #555;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h2>Daily Report</h2>
-    </div>
-    <div class="content">
-      <p>Dear Team,</p>
-      <p>Please find my end-of-day report below:</p>
-      <div class="time-info">
-        <strong>Login Time:</strong> {{ login_time }}<br>
-        <strong>Logout Time:</strong> {{ logout_time }}
-      </div>
-      <div class="activities">
-        <strong>Daily Activities:</strong>
-        <div style="white-space: pre-line; font-family: Arial, sans-serif; margin: 0 0 10px 0;">
-  {{ body }}
-</div>
-      </div>
-    </div>
-    <div class="signature">
-      Best regards,<br>
-      <strong>Sreesh</strong>
-    </div>
-  </div>
-</body>
-</html>''';
-                  Clipboard.setData(const ClipboardData(text: template));
-                  showToast('Template copied to clipboard!');
-                },
-                icon: const Icon(Icons.copy, color: Colors.black),
-                label: Text(
-                  'Copy Template',
-                  style: GoogleFonts.poppins(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                ),
-              ),
             ],
           ),
           actions: [
@@ -679,14 +566,15 @@ class _EmailScreenState extends State<EmailScreen>
               onPressed: () async {
                 await _saveEmailServiceSettings();
                 Navigator.of(context).pop();
-                showToast('Settings saved');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Settings saved'),
+                    backgroundColor: Colors.amber,
+                  ),
+                );
               },
             ),
           ],
-        ).animate().fadeIn().scale(
-          begin: const Offset(0.9, 0.9),
-          end: const Offset(1.0, 1.0),
-          duration: 300.ms,
         );
       },
     );
@@ -739,6 +627,12 @@ class _EmailScreenState extends State<EmailScreen>
                     builder: (context) => const ContactUsScreen(),
                   ),
                 );
+              } else if (value == 'templates') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const TemplateScreen(),
+                  ),
+                );
               }
             },
             itemBuilder:
@@ -788,6 +682,20 @@ class _EmailScreenState extends State<EmailScreen>
                         ),
                         const SizedBox(width: 8),
                         Text('Contact Us', style: GoogleFonts.poppins()),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'templates',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.description_outlined,
+                          color: Colors.amber,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text('Email Templates', style: GoogleFonts.poppins()),
                       ],
                     ),
                   ),
@@ -1515,6 +1423,1104 @@ class ContactUsScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// Template Screen
+class TemplateScreen extends StatefulWidget {
+  const TemplateScreen({super.key});
+
+  @override
+  _TemplateScreenState createState() => _TemplateScreenState();
+}
+
+class _TemplateScreenState extends State<TemplateScreen> {
+  final List<Map<String, dynamic>> _templates = [
+    {
+      'name': 'Default Template',
+      'description': 'Simple and clean template for daily reports',
+      'templateId': 'template_default',
+      'preview': 'assets/template_preview1.png',
+      'htmlCode': '''<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Daily Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      color: #222;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      background: #fff;
+      margin: 30px auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      padding: 32px 28px 18px 28px;
+    }
+    .header {
+      border-bottom: 1.5px solid #e0e0e0;
+      padding-bottom: 10px;
+      margin-bottom: 18px;
+    }
+    .header h2 {
+      margin: 0;
+      font-size: 22px;
+      color: #1a73e8;
+      font-weight: 600;
+    }
+    .content p {
+      margin: 10px 0 0 0;
+      font-size: 15px;
+    }
+    .time-info {
+      background: #f7fafc;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 10px 16px;
+      margin: 18px 0 12px 0;
+      font-size: 14px;
+    }
+    .activities {
+      margin: 0 0 10px 0;
+    }
+    .activities ul {
+      margin: 0 0 0 18px;
+      padding: 0;
+    }
+    .activities li {
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+    .signature {
+      margin-top: 24px;
+      border-top: 1px solid #e0e0e0;
+      padding-top: 12px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Daily Report</h2>
+    </div>
+    <div class="content">
+      <p>Dear Team,</p>
+      <p>Please find my end-of-day report below:</p>
+      <div class="time-info">
+        <strong>Login Time:</strong> {{ login_time }}<br>
+        <strong>Logout Time:</strong> {{ logout_time }}
+      </div>
+      <div class="activities">
+        <strong>Daily Activities:</strong>
+        <div style="white-space: pre-line; font-family: Arial, sans-serif; margin: 0 0 10px 0;">
+  {{ body }}
+</div>
+      </div>
+    </div>
+    <div class="signature">
+      Best regards,<br>
+      <strong>Sreesh</strong>
+    </div>
+  </div>
+</body>
+</html>''',
+    },
+    {
+      'name': 'Professional Template',
+      'description': 'Formal template with company branding',
+      'templateId': 'template_professional',
+      'preview': 'assets/template_preview2.png',
+      'htmlCode': '''<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Professional Daily Report</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 650px;
+      background: #fff;
+      margin: 40px auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      padding: 40px 35px 25px 35px;
+    }
+    .header {
+      text-align: center;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 15px;
+      margin-bottom: 25px;
+    }
+    .header h2 {
+      margin: 0;
+      font-size: 24px;
+      color: #2c3e50;
+      font-weight: 600;
+    }
+    .date {
+      color: #666;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    .content {
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .time-info {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 15px 20px;
+      margin: 25px 0 20px 0;
+      font-size: 14px;
+    }
+    .activities {
+      margin: 20px 0;
+    }
+    .activities h3 {
+      color: #2c3e50;
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+    .activities ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .activities li {
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+    .signature {
+      margin-top: 30px;
+      border-top: 2px solid #f0f0f0;
+      padding-top: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+    .company-logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="company-logo">
+        <!-- Add your company logo here -->
+        <h1 style="color: #2c3e50; margin: 0;">COMPANY NAME</h1>
+      </div>
+      <h2>Daily Activity Report</h2>
+      <div class="date">{{ date }}</div>
+    </div>
+    <div class="content">
+      <p>Dear Team,</p>
+      <p>Please find below my daily activity report:</p>
+      <div class="time-info">
+        <strong>Login Time:</strong> {{ login_time }}<br>
+        <strong>Logout Time:</strong> {{ logout_time }}
+      </div>
+      <div class="activities">
+        <h3>Activities Completed:</h3>
+        <div style="white-space: pre-line; font-family: 'Segoe UI', sans-serif;">
+          {{ body }}
+        </div>
+      </div>
+    </div>
+    <div class="signature">
+      Best regards,<br>
+      <strong>Sreesh</strong><br>
+      <span style="color: #666; font-size: 13px;">Position Title</span>
+    </div>
+  </div>
+</body>
+</html>''',
+    },
+    {
+      'name': 'Minimal Template',
+      'description': 'Minimalist design with focus on content',
+      'templateId': 'template_minimal',
+      'preview': 'assets/template_preview3.png',
+      'htmlCode': '''<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Minimal Daily Report</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      color: #2d3436;
+      background: #ffffff;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 580px;
+      background: #ffffff;
+      margin: 40px auto;
+      padding: 40px;
+    }
+    .header {
+      margin-bottom: 30px;
+    }
+    .header h2 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: #2d3436;
+    }
+    .date {
+      color: #636e72;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    .content {
+      font-size: 15px;
+    }
+    .time-info {
+      background: #f5f6fa;
+      padding: 15px;
+      margin: 25px 0;
+      font-size: 14px;
+      border-left: 3px solid #0984e3;
+    }
+    .activities {
+      margin: 25px 0;
+    }
+    .activities h3 {
+      color: #2d3436;
+      font-size: 16px;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+    .signature {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #dfe6e9;
+      font-size: 14px;
+      color: #636e72;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Daily Report</h2>
+      <div class="date">{{ date }}</div>
+    </div>
+    <div class="content">
+      <div class="time-info">
+        <strong>Login:</strong> {{ login_time }}<br>
+        <strong>Logout:</strong> {{ logout_time }}
+      </div>
+      <div class="activities">
+        <h3>Activities</h3>
+        <div style="white-space: pre-line;">
+          {{ body }}
+        </div>
+      </div>
+    </div>
+    <div class="signature">
+      Best regards,<br>
+      <strong>Sreesh</strong>
+    </div>
+  </div>
+</body>
+</html>''',
+    },
+  ];
+
+  String _selectedTemplateId = 'template_default';
+  int _currentIndex = 0;
+
+  // Add controllers for email service settings
+  final TextEditingController _serviceIdController = TextEditingController();
+  final TextEditingController _templateIdController = TextEditingController();
+  final TextEditingController _userIdController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEmailServiceSettings();
+  }
+
+  Future<void> _loadEmailServiceSettings() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _serviceIdController.text = prefs.getString('serviceId') ?? '';
+    _templateIdController.text = prefs.getString('templateId') ?? '';
+    _userIdController.text = prefs.getString('userId') ?? '';
+  }
+
+  Future<void> _saveEmailServiceSettings() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('serviceId', _serviceIdController.text);
+    await prefs.setString('templateId', _templateIdController.text);
+    await prefs.setString('userId', _userIdController.text);
+  }
+
+  void _showServiceSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF222222),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              const Icon(Icons.settings, color: Colors.amber),
+              const SizedBox(width: 8),
+              Text('EmailJs', style: GoogleFonts.poppins(color: Colors.white)),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.help_outline, color: Colors.amber),
+                tooltip: 'How to use EmailJS',
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const HowToSetEmailJsScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _serviceIdController,
+                decoration: const InputDecoration(
+                  labelText: 'Service ID',
+                  labelStyle: TextStyle(color: Colors.amber),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _templateIdController,
+                decoration: const InputDecoration(
+                  labelText: 'Template ID',
+                  labelStyle: TextStyle(color: Colors.amber),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _userIdController,
+                decoration: const InputDecoration(
+                  labelText: 'User ID',
+                  labelStyle: TextStyle(color: Colors.amber),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.poppins(color: Colors.grey[300]),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text(
+                'Save',
+                style: GoogleFonts.poppins(color: Colors.amber),
+              ),
+              onPressed: () async {
+                await _saveEmailServiceSettings();
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Settings saved'),
+                    backgroundColor: Colors.amber,
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _serviceIdController.dispose();
+    _templateIdController.dispose();
+    _userIdController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Email Templates',
+          style: GoogleFonts.poppins(color: Colors.amber),
+        ),
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.amber),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add, color: Colors.amber),
+            onPressed: _showAddTemplateDialog,
+          ),
+        ],
+      ),
+      backgroundColor: Colors.black87,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Select a template for your daily reports',
+              style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey[400]),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _templates.length,
+              itemBuilder: (context, index) {
+                final template = _templates[index];
+                final isSelected =
+                    template['templateId'] == _selectedTemplateId;
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: isSelected ? Colors.amber : Colors.transparent,
+                      width: 2,
+                    ),
+                  ),
+                  color: const Color(0xFF1A1A1A),
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedTemplateId = template['templateId'];
+                      });
+                      _showTemplateDetails(template);
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.description_outlined,
+                                color:
+                                    isSelected
+                                        ? Colors.amber
+                                        : Colors.grey[400],
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  template['name'],
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              if (isSelected)
+                                const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.amber,
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            template['description'],
+                            style: GoogleFonts.poppins(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton.icon(
+                                onPressed: () => _showTemplateDetails(template),
+                                icon: const Icon(
+                                  Icons.visibility_outlined,
+                                  color: Colors.amber,
+                                  size: 20,
+                                ),
+                                label: Text(
+                                  'Preview',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.amber,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              TextButton.icon(
+                                onPressed:
+                                    () => _showHowToUseTemplate(template),
+                                icon: const Icon(
+                                  Icons.help_outline,
+                                  color: Colors.amber,
+                                  size: 20,
+                                ),
+                                label: Text(
+                                  'How to Use',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.amber,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ).animate().fadeIn(delay: (100 * index).ms);
+              },
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.black,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.amber.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+            switch (index) {
+              case 0:
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => const EmailScreen()),
+                );
+                break;
+              case 1:
+                // Already on templates screen
+                break;
+              case 2:
+                _showServiceSettingsDialog();
+                break;
+            }
+          },
+          backgroundColor: Colors.black,
+          selectedItemColor: Colors.amber,
+          unselectedItemColor: Colors.grey[600],
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.description_outlined),
+              activeIcon: Icon(Icons.description),
+              label: 'Templates',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings_outlined),
+              activeIcon: Icon(Icons.settings),
+              label: 'Settings',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showTemplateDetails(Map<String, dynamic> template) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF222222),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              const Icon(Icons.description_outlined, color: Colors.amber),
+              const SizedBox(width: 8),
+              Text(
+                template['name'],
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Template ID:',
+                  style: GoogleFonts.poppins(
+                    color: Colors.amber,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          template['templateId'],
+                          style: GoogleFonts.poppins(color: Colors.white),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.copy, color: Colors.amber),
+                        onPressed: () {
+                          Clipboard.setData(
+                            ClipboardData(text: template['templateId']),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Template ID copied to clipboard'),
+                              backgroundColor: Colors.amber,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Description:',
+                  style: GoogleFonts.poppins(
+                    color: Colors.amber,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  template['description'],
+                  style: GoogleFonts.poppins(color: Colors.white),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Variables:',
+                  style: GoogleFonts.poppins(
+                    color: Colors.amber,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '{{body}} - Daily activities\n{{login_time}} - Login time\n{{logout_time}} - Logout time\n{{date}} - Current date',
+                  style: GoogleFonts.poppins(color: Colors.white),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder:
+                            (context) =>
+                                TemplatePreviewScreen(template: template),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.code),
+                  label: Text('View HTML Code', style: GoogleFonts.poppins()),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text(
+                'Close',
+                style: GoogleFonts.poppins(color: Colors.amber),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showHowToUseTemplate(Map<String, dynamic> template) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF222222),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              const Icon(Icons.help_outline, color: Colors.amber),
+              const SizedBox(width: 8),
+              Text(
+                'How to Use ${template['name']}',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '1. Copy the template ID:',
+                style: GoogleFonts.poppins(
+                  color: Colors.amber,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        template['templateId'],
+                        style: GoogleFonts.poppins(color: Colors.white),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.copy, color: Colors.amber),
+                      onPressed: () {
+                        Clipboard.setData(
+                          ClipboardData(text: template['templateId']),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Template ID copied to clipboard'),
+                            backgroundColor: Colors.amber,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '2. Go to EmailJS dashboard and create a new template',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '3. Paste the template ID in your EmailJS template settings',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '4. Make sure to include these variables in your template:',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '{{body}}\n{{login_time}}\n{{logout_time}}\n{{date}}',
+                  style: GoogleFonts.poppins(color: Colors.amber),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text(
+                'Close',
+                style: GoogleFonts.poppins(color: Colors.amber),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showAddTemplateDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final TextEditingController nameController = TextEditingController();
+        final TextEditingController descriptionController =
+            TextEditingController();
+        final TextEditingController templateIdController =
+            TextEditingController();
+
+        return AlertDialog(
+          backgroundColor: const Color(0xFF222222),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              const Icon(Icons.add_circle_outline, color: Colors.amber),
+              const SizedBox(width: 8),
+              Text(
+                'Add New Template',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Template Name',
+                  labelStyle: TextStyle(color: Colors.amber),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  labelStyle: TextStyle(color: Colors.amber),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: templateIdController,
+                decoration: const InputDecoration(
+                  labelText: 'Template ID',
+                  labelStyle: TextStyle(color: Colors.amber),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.poppins(color: Colors.grey[300]),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text(
+                'Add',
+                style: GoogleFonts.poppins(color: Colors.amber),
+              ),
+              onPressed: () {
+                if (nameController.text.isNotEmpty &&
+                    descriptionController.text.isNotEmpty &&
+                    templateIdController.text.isNotEmpty) {
+                  setState(() {
+                    _templates.add({
+                      'name': nameController.text,
+                      'description': descriptionController.text,
+                      'templateId': templateIdController.text,
+                      'preview': 'assets/template_preview1.png',
+                    });
+                  });
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+// Template Preview Screen
+class TemplatePreviewScreen extends StatelessWidget {
+  final Map<String, dynamic> template;
+
+  const TemplatePreviewScreen({super.key, required this.template});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          '${template['name']} Preview',
+          style: GoogleFonts.poppins(color: Colors.amber),
+        ),
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.amber),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.copy, color: Colors.amber),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: template['htmlCode']));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('HTML code copied to clipboard'),
+                  backgroundColor: Colors.amber,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      backgroundColor: Colors.black87,
+      body: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            color: const Color(0xFF1A1A1A),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Template Details',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  template['description'],
+                  style: GoogleFonts.poppins(
+                    color: Colors.grey[400],
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Text(
+                      'Template ID: ',
+                      style: GoogleFonts.poppins(
+                        color: Colors.amber,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        template['templateId'],
+                        style: GoogleFonts.poppins(color: Colors.white),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.copy,
+                        color: Colors.amber,
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        Clipboard.setData(
+                          ClipboardData(text: template['templateId']),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Template ID copied to clipboard'),
+                            backgroundColor: Colors.amber,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A1A1A),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.amber.withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'HTML Code',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.amber,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: SelectableText(
+                        template['htmlCode'],
+                        style: GoogleFonts.robotoMono(
+                          color: Colors.grey[300],
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
