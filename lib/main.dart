@@ -682,6 +682,14 @@ ${_bodyController.text}
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.chat_outlined, color: Colors.amber),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const ChatScreen()),
+              );
+            },
+          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.help_outline, color: Colors.amber),
             color: const Color(0xFF222222),
@@ -2618,5 +2626,239 @@ class TemplatePreviewScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// Add this new class after the TemplatePreviewScreen class
+class ChatScreen extends StatefulWidget {
+  const ChatScreen({super.key});
+
+  @override
+  _ChatScreenState createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+  final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final List<Map<String, dynamic>> _messages = [];
+  bool _isTyping = false;
+  late final GenerativeModel model;
+
+  @override
+  void initState() {
+    super.initState();
+    model = GenerativeModel(
+      model: 'gemini-1.5-flash',
+      apiKey: dotenv.env['GEMINI_API_KEY'] ?? '',
+    );
+    // Add initial greeting
+    _messages.add({
+      'text': 'Hello! I\'m your DRmail assistant. How can I help you today?',
+      'isUser': false,
+    });
+  }
+
+  void _scrollToBottom() {
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
+
+  Future<void> _sendMessage() async {
+    if (_messageController.text.trim().isEmpty) return;
+
+    final userMessage = _messageController.text;
+    _messageController.clear();
+
+    setState(() {
+      _messages.add({'text': userMessage, 'isUser': true});
+      _isTyping = true;
+    });
+
+    _scrollToBottom();
+
+    try {
+      final prompt = '''
+You are a helpful assistant for DRmail, a daily report email application. 
+The user is asking about DRmail. Please provide a helpful response.
+Keep your response concise and relevant to DRmail.
+
+User question: $userMessage
+''';
+
+      final content = [Content.text(prompt)];
+      final response = await model.generateContent(content);
+      final aiResponse = response.text;
+
+      if (aiResponse != null) {
+        setState(() {
+          _messages.add({'text': aiResponse, 'isUser': false});
+        });
+      } else {
+        setState(() {
+          _messages.add({
+            'text':
+                'I apologize, but I couldn\'t generate a response. Please try again.',
+            'isUser': false,
+          });
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _messages.add({
+          'text': 'Sorry, I encountered an error. Please try again.',
+          'isUser': false,
+        });
+      });
+    } finally {
+      setState(() {
+        _isTyping = false;
+      });
+      _scrollToBottom();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            const Icon(Icons.chat_outlined, color: Colors.amber),
+            const SizedBox(width: 8),
+            Text(
+              'DRmail Assistant',
+              style: GoogleFonts.poppins(color: Colors.amber),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.amber),
+      ),
+      backgroundColor: Colors.black87,
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(16),
+              itemCount: _messages.length + (_isTyping ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == _messages.length) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.amber,
+                            strokeWidth: 2,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Assistant is typing...',
+                          style: GoogleFonts.poppins(
+                            color: Colors.grey[400],
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                final message = _messages[index];
+                return Align(
+                      alignment:
+                          message['isUser']
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color:
+                              message['isUser']
+                                  ? Colors.amber
+                                  : const Color(0xFF1A1A1A),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.75,
+                        ),
+                        child: Text(
+                          message['text'],
+                          style: GoogleFonts.poppins(
+                            color:
+                                message['isUser'] ? Colors.black : Colors.white,
+                          ),
+                        ),
+                      ),
+                    )
+                    .animate()
+                    .fadeIn(duration: 300.ms)
+                    .slideX(begin: message['isUser'] ? 0.2 : -0.2, end: 0);
+              },
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.amber.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, -5),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _messageController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Ask about DRmail...',
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      filled: true,
+                      fillColor: const Color(0xFF1A1A1A),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.all(16),
+                    ),
+                    onSubmitted: (_) => _sendMessage(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: _sendMessage,
+                  icon: const Icon(Icons.send, color: Colors.amber),
+                  style: IconButton.styleFrom(
+                    backgroundColor: const Color(0xFF1A1A1A),
+                    padding: const EdgeInsets.all(12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 }
