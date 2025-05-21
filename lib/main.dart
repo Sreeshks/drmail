@@ -9,9 +9,11 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   runApp(const DRmailApp());
 }
 
@@ -125,15 +127,15 @@ class _EmailScreenState extends State<EmailScreen>
   int _reportCount = 0;
   bool _showServiceSettings = false;
   bool _isImproving = false;
-  final model = GenerativeModel(
-    model: 'gemini-1.5-flash',
-    apiKey:
-        'AIzaSyCsjb5GGAdyjCtTBq047e6930Xq-ho_uyE', // Replace with your actual API key
-  );
+  late final GenerativeModel model;
 
   @override
   void initState() {
     super.initState();
+    model = GenerativeModel(
+      model: 'gemini-1.5-flash',
+      apiKey: dotenv.env['GEMINI_API_KEY'] ?? '',
+    );
     _tabController = TabController(length: 2, vsync: this);
     // Set default login time to 9:30 AM
     _loginTimeController.text = '9:30 AM';
