@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -123,6 +124,12 @@ class _EmailScreenState extends State<EmailScreen>
   bool _isLoading = true;
   int _reportCount = 0;
   bool _showServiceSettings = false;
+  bool _isImproving = false;
+  final model = GenerativeModel(
+    model: 'gemini-1.5-flash',
+    apiKey:
+        'AIzaSyCsjb5GGAdyjCtTBq047e6930Xq-ho_uyE', // Replace with your actual API key
+  );
 
   @override
   void initState() {
@@ -314,6 +321,45 @@ class _EmailScreenState extends State<EmailScreen>
     } finally {
       setState(() {
         _isSending = false;
+      });
+    }
+  }
+
+  Future<void> _improveText() async {
+    if (_bodyController.text.isEmpty) {
+      showToast('Please enter some text first');
+      return;
+    }
+
+    setState(() {
+      _isImproving = true;
+    });
+
+    try {
+      final prompt = '''
+Please improve the following daily report text to make it more professional and well-written. 
+Keep the bullet points format and maintain the same information, just improve the language:
+
+${_bodyController.text}
+''';
+
+      final content = [Content.text(prompt)];
+      final response = await model.generateContent(content);
+      final improvedText = response.text;
+
+      if (improvedText != null) {
+        setState(() {
+          _bodyController.text = improvedText;
+        });
+        showToast('Text improved successfully');
+      } else {
+        showToast('Failed to improve text');
+      }
+    } catch (e) {
+      showToast('Error: ${e.toString()}');
+    } finally {
+      setState(() {
+        _isImproving = false;
       });
     }
   }
@@ -979,13 +1025,31 @@ class _EmailScreenState extends State<EmailScreen>
                             fontFamily: 'Roboto',
                             fontSize: 14,
                           ),
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             hintText:
                                 'Enter your daily activities here...\nClick "Add Point" to add bullet points',
-                            hintStyle: TextStyle(color: Colors.grey),
-                            prefixIcon: Icon(
+                            hintStyle: const TextStyle(color: Colors.grey),
+                            prefixIcon: const Icon(
                               Icons.edit_note,
                               color: Colors.amber,
+                            ),
+                            suffixIcon: IconButton(
+                              icon:
+                                  _isImproving
+                                      ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.amber,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                      : const Icon(
+                                        Icons.auto_awesome,
+                                        color: Colors.amber,
+                                      ),
+                              onPressed: _isImproving ? null : _improveText,
+                              tooltip: 'Improve text using AI',
                             ),
                           ),
                           maxLines: 8,
