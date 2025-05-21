@@ -143,6 +143,35 @@ class _EmailScreenState extends State<EmailScreen>
     _logoutTimeController.text = '5:30 PM';
     _loadReports();
     _loadEmailServiceSettings();
+
+    // Show AI feature message after the first frame is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showAIFeatureMessage();
+    });
+  }
+
+  void _showAIFeatureMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.auto_awesome, color: Colors.amber),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Use AI to improve your report text! Click the sparkle icon ✨',
+                style: GoogleFonts.poppins(),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF1A1A1A),
+        duration: const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 
   Future<void> _loadEmailServiceSettings() async {
