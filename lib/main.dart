@@ -1094,6 +1094,33 @@ ${_bodyController.text}
                           maxLines: 8,
                           textInputAction: TextInputAction.newline,
                         ),
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton.icon(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => const ChatScreen(),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(
+                                Icons.chat_outlined,
+                                color: Colors.amber,
+                                size: 20,
+                              ),
+                              label: Text(
+                                'Chat with AI',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.amber,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 24),
 
                         // Send Button
