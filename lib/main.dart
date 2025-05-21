@@ -2681,8 +2681,44 @@ class _ChatScreenState extends State<ChatScreen> {
 
     try {
       final prompt = '''
-You are a helpful assistant for DRmail, a daily report email application. 
-The user is asking about DRmail. Please provide a helpful response.
+You are a helpful assistant for DRmail, a daily report email application. Here is the knowledge about DRmail and EmailJS:
+
+DRmail Usage:
+1. The app has two main tabs: New Report and History
+2. In New Report tab, users can:
+   - Enter daily activities
+   - Use "Add Point" button for bullet points
+   - Set login/logout times
+   - Send reports via email
+3. History tab shows past reports with:
+   - Date
+   - Login/Logout times
+   - Report content
+   - Option to delete reports
+
+EmailJS Setup:
+1. Sign up at https://www.emailjs.com/
+2. Add an email service (Gmail, Outlook, etc.)
+3. Create an email template with variables:
+   - {{body}} - Daily activities
+   - {{login_time}} - Login time
+   - {{logout_time}} - Logout time
+   - {{date}} - Current date
+4. Get required IDs:
+   - Service ID
+   - Template ID
+   - User ID
+5. Add these IDs in DRmail settings
+
+Features:
+- AI text improvement
+- Report history
+- Email templates
+- Dark theme UI
+- Bullet point support
+- Time picker for login/logout
+
+The user is asking about DRmail. Please provide a helpful response based on this knowledge.
 Keep your response concise and relevant to DRmail.
 
 User question: $userMessage
